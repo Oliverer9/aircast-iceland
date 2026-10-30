@@ -197,8 +197,9 @@
           differently from the JSON API (Reykjavík is 1 there and 1470 in the JSON API). Checking showed 18 of the 19
           numbers do match a JSON station and the last matches by name, so the coordinates come from the JSON station
           list instead of being typed in. The XML is simple and flat, so a small regex parser reads it. It started
-          inside the station panel, but moved to its own full-width card below the map and the panel, where all
-          8 time steps fit side by side on a computer instead of scrolling.
+          inside the station panel, then got its own card in the empty space under the map. The 8 time steps are a
+          grid (two rows of four, or four rows of two on a phone) so the card never scrolls sideways. On a phone the
+          order is map, station details, forecast.
         </li>
         <li>
           <strong>Íslenska / English.</strong> Every piece of text on the page, plus number formats (10,2 instead of

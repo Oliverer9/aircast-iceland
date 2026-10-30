@@ -104,12 +104,12 @@ export default function App() {
               </section>
 
               <StationDetails station={station} />
-            </div>
 
-            <section className="card forecast-card" aria-labelledby="forecast-heading">
-              <h2 id="forecast-heading">{t('forecast')}</h2>
-              <Forecast lat={station.lat} lon={station.lon} />
-            </section>
+              <section className="card forecast-card" aria-labelledby="forecast-heading">
+                <h2 id="forecast-heading">{t('forecast')}</h2>
+                <Forecast lat={station.lat} lon={station.lon} />
+              </section>
+            </div>
           </>
         )}
       </main>

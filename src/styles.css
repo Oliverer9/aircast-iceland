@@ -272,17 +272,37 @@ select {
   padding: 1.25rem 1.5rem;
 }
 
+/* Phones: map, then the station's details, then the forecast. */
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'map'
+    'details'
+    'forecast';
   gap: 1.25rem;
   margin-top: 1rem;
   align-items: start;
 }
-/* Wide screens: the map leads, the details sit beside it. */
+.map-card {
+  grid-area: map;
+}
+.details-card {
+  grid-area: details;
+}
+.forecast-card {
+  grid-area: forecast;
+}
+/* Wide screens: the map leads, the forecast fills the space under it, and the details
+   run down the right. The second row is flexible, so the tall details panel stretches
+   that row instead of leaving a gap between the map and the forecast. */
 @media (min-width: 60rem) {
   .layout {
     grid-template-columns: minmax(0, 3fr) minmax(20rem, 2fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'map details'
+      'forecast details';
   }
 }
 
@@ -576,23 +596,23 @@ td {
   margin-top: 0.5rem;
 }
 
-/* Forecast: its own full-width card under the map and the station panel */
-.forecast-card {
-  margin-top: 1.25rem;
-}
-
-/* Forecast: a row of 3-hour steps that scrolls sideways if it doesn't fit */
+/* Forecast: the eight 3-hour steps as a grid, two rows of four, so it never scrolls
+   sideways. Very narrow phones get four rows of two. */
 .forecast {
   list-style: none;
   margin: 0.25rem 0 0;
-  padding: 0 0 0.25rem;
-  display: flex;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.5rem;
-  overflow-x: auto;
+}
+@media (max-width: 26rem) {
+  .forecast {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 .forecast li {
-  /* Share the width when there is room (the full-width card), scroll sideways when there is not. */
-  flex: 1 0 6.25rem;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
