@@ -576,6 +576,11 @@ td {
   margin-top: 0.5rem;
 }
 
+/* Forecast: its own full-width card under the map and the station panel */
+.forecast-card {
+  margin-top: 1.25rem;
+}
+
 /* Forecast: a row of 3-hour steps that scrolls sideways if it doesn't fit */
 .forecast {
   list-style: none;
@@ -586,7 +591,8 @@ td {
   overflow-x: auto;
 }
 .forecast li {
-  flex: 0 0 6.25rem;
+  /* Share the width when there is room (the full-width card), scroll sideways when there is not. */
+  flex: 1 0 6.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.125rem;

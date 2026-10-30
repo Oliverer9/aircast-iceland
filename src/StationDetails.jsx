@@ -1,7 +1,6 @@
 import { levelColor, levelTextColor } from './airLevels.js';
 import { useText } from './i18n.jsx';
 import HistoryChart from './HistoryChart.jsx';
-import Forecast from './Forecast.jsx';
 
 const clock = (time) => time.slice(11, 16); // "2026-10-28 20:00:00" or "2026-10-28T20:50:00" → "20:00"
 
@@ -116,9 +115,6 @@ export default function StationDetails({ station }) {
           </dl>
         </>
       )}
-
-      <h3>{t('forecast')}</h3>
-      <Forecast lat={station.lat} lon={station.lon} />
     </section>
   );
 }

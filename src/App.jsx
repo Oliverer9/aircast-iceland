@@ -6,6 +6,7 @@ import { nearest } from './geo.js';
 import StationMap from './StationMap.jsx';
 import StationDetails from './StationDetails.jsx';
 import LevelLegend from './LevelLegend.jsx';
+import Forecast from './Forecast.jsx';
 import SiteHeader from './SiteHeader.jsx';
 
 const DEFAULT_STATION = 'STA-IS0005A'; // Reykjavík Grensás
@@ -104,6 +105,11 @@ export default function App() {
 
               <StationDetails station={station} />
             </div>
+
+            <section className="card forecast-card" aria-labelledby="forecast-heading">
+              <h2 id="forecast-heading">{t('forecast')}</h2>
+              <Forecast lat={station.lat} lon={station.lon} />
+            </section>
           </>
         )}
       </main>
