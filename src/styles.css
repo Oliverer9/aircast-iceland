@@ -271,15 +271,17 @@ select {
   padding: 1.25rem 1.5rem;
 }
 
-/* Phones: everything in one column, in the order of the code. */
+/* Phones: one column with the map first and the forecast last, so the map is what you
+   see first. The forecast has no buttons or links, so moving it doesn't change the order
+   the keyboard goes through the page. */
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    'forecast'
     'map'
     'picker'
-    'details';
+    'details'
+    'forecast';
   gap: 1.25rem;
   margin-top: 1rem;
   align-items: start;
