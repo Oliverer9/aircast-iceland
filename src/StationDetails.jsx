@@ -50,11 +50,14 @@ export default function StationDetails({ station }) {
           <dl>
             <dt>Wind</dt>
             <dd>
-              {number(station.weather.wind)} m/s from {station.weather.direction}
+              {number(station.weather.wind)} m/s{station.weather.direction && ` from ${station.weather.direction}`}
               {station.weather.gusts !== null && `, gusts ${number(station.weather.gusts)} m/s`}
             </dd>
             <dt>Temperature</dt>
-            <dd>{number(station.weather.temperature)} °C</dd>
+            {/* Some stations don't report every value; don't crash on a missing one. */}
+            <dd>
+              {station.weather.temperature !== null ? `${number(station.weather.temperature)} °C` : 'Not measured'}
+            </dd>
           </dl>
         </>
       )}

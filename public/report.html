@@ -197,6 +197,15 @@
           Checked at zoom 13 in Reykjavík: street names, road numbers and neighbourhoods are all readable.
         </li>
         <li>
+          <strong>Click anywhere for the weather.</strong> Clicking the map (not a station dot) opens a popup with
+          the latest reading from the <em>nearest</em> Veðurstofa weather station: its name, how far away it is,
+          the time, temperature, wind and gusts. It is the nearest real measurement, not an estimate for that exact
+          spot, so the popup always says which station it is, and adds "far from where you clicked" beyond 40 km.
+          The server already had all 270 weather stations for the wind animation; sending their names and
+          temperatures too made the response grow from about 40 to 80 KB. Clicking a location only works with a
+          mouse or touch; keyboard users get the same weather data per station through the dropdown.
+        </li>
+        <li>
           <strong>The dropdown stays</strong> as another way to pick a station. Reykjavík's stations sit close
           together on the map, and a list is easier for screen reader users.
         </li>
@@ -264,6 +273,12 @@
           <strong>Markers could be focused with Tab, but Enter did nothing.</strong> Leaflet makes markers into
           buttons but doesn't select them from the keyboard. Found by testing with the keyboard; fixed by handling
           Enter and Space.
+        </li>
+        <li>
+          <strong>Choosing Akureyri crashed the whole page</strong>, on the live site too. Its nearest weather
+          station reported no temperature (8 of 270 stations didn't at the time), and the details panel assumed
+          every value is there. Found while testing the click-for-weather feature. Missing values now show as
+          "Not measured", and every station in the list was selected one by one to check.
         </li>
         <li>
           <strong>The page was 27 px too wide on a phone</strong> because the dropdown grew to fit the longest

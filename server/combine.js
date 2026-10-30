@@ -40,10 +40,23 @@ export async function getAirAndWind() {
     .filter((w) => w.directionDegrees !== null)
     .map((w) => ({ lat: w.lat, lon: w.lon, speed: w.wind, from: w.directionDegrees }));
 
+  // Every weather station's latest reading, for clicking anywhere on the map.
+  const weatherStations = weather.map((w) => ({
+    name: w.name,
+    lat: w.lat,
+    lon: w.lon,
+    time: w.time,
+    temperature: w.temperature,
+    wind: w.wind,
+    gusts: w.gusts,
+    direction: w.direction,
+  }));
+
   return {
     sources: ['Loftgæði (Umhverfis- og orkustofnun)', 'Veðurstofa Íslands'],
     fetchedAt: new Date().toISOString(),
     stations,
     wind,
+    weatherStations,
   };
 }

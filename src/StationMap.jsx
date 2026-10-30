@@ -4,6 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { levelColor, levelName } from './airLevels.js';
 import WindLayer from './WindLayer.jsx';
+import ClickWeather from './ClickWeather.jsx';
 
 function markerIcon(station, selected) {
   const size = selected ? 34 : 24;
@@ -77,7 +78,7 @@ function KeepSizedAndFitted({ stations }) {
   return null;
 }
 
-export default function StationMap({ stations, wind, showWind, selectedId, onSelect }) {
+export default function StationMap({ stations, wind, weatherStations, showWind, selectedId, onSelect }) {
   const icons = useMemo(
     () => new Map(stations.map((s) => [s.id, markerIcon(s, s.id === selectedId)])),
     [stations, selectedId],
@@ -105,6 +106,7 @@ export default function StationMap({ stations, wind, showWind, selectedId, onSel
         <PollutionClouds stations={stations} />
       </Pane>
       {showWind && <WindLayer wind={wind} />}
+      <ClickWeather weatherStations={weatherStations} />
       {stations.map((s) => (
         <Marker
           key={s.id}

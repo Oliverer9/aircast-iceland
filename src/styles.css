@@ -157,6 +157,18 @@ td {
   border-radius: 50%;
 }
 
+/* Click-for-weather popup */
+.click-weather p {
+  margin: 0 0 0.25rem;
+}
+.click-weather-title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+.click-weather dl {
+  margin: 0.25rem 0 0;
+}
+
 /* Legend and colour swatches */
 .legend h3 {
   font-size: 1rem;
