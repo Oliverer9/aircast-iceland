@@ -62,6 +62,9 @@ app.get('/api/forecast', async (req, res) => {
   }
 });
 
+// Any other /api address is a mistake: say so, instead of falling through to the page below.
+app.use('/api', (req, res) => res.status(404).json({ error: 'No such API route.' }));
+
 // In production (npm run build && npm start) the server also serves the built React app.
 const dist = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist');
 app.use(express.static(dist));
