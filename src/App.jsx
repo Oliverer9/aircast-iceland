@@ -60,28 +60,13 @@ export default function App() {
 
         {station && (
           <>
-            <div className="station-picker">
-              <label htmlFor="station">{t('station')}</label>
-              <select id="station" value={station.id} onChange={(e) => setSelectedId(e.target.value)}>
-                {data.stations.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} – {levelName(s.level)}
-                  </option>
-                ))}
-              </select>
-              <button type="button" className="toggle near-me" onClick={findNearMe}>
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <circle cx="12" cy="12" r="4" fill="currentColor" />
-                  <path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-                {t('nearMe')}
-              </button>
-              <p className="muted small near-me-status" role="status">
-                {nearMe && t(nearMe.key, { ...nearMe.vars, km: nearMe.vars ? number(nearMe.vars.km) : '' })}
-              </p>
-            </div>
-
+            {/* In the same order as on screen, so the keyboard and screen readers follow the page. */}
             <div className="layout">
+              <section className="card forecast-card" aria-labelledby="forecast-heading">
+                <h2 id="forecast-heading">{t('forecast')}</h2>
+                <Forecast lat={station.lat} lon={station.lon} />
+              </section>
+
               <section className="card map-card" aria-labelledby="map-heading">
                 <div className="card-head">
                   <h2 id="map-heading">{t('mapTitle')}</h2>
@@ -103,12 +88,28 @@ export default function App() {
                 <LevelLegend />
               </section>
 
-              <StationDetails station={station} />
+              <div className="card station-picker">
+                <label htmlFor="station">{t('station')}</label>
+                <select id="station" value={station.id} onChange={(e) => setSelectedId(e.target.value)}>
+                  {data.stations.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} – {levelName(s.level)}
+                    </option>
+                  ))}
+                </select>
+                <button type="button" className="toggle near-me" onClick={findNearMe}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4" fill="currentColor" />
+                    <path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                  {t('nearMe')}
+                </button>
+                <p className="muted small near-me-status" role="status">
+                  {nearMe && t(nearMe.key, { ...nearMe.vars, km: nearMe.vars ? number(nearMe.vars.km) : '' })}
+                </p>
+              </div>
 
-              <section className="card forecast-card" aria-labelledby="forecast-heading">
-                <h2 id="forecast-heading">{t('forecast')}</h2>
-                <Forecast lat={station.lat} lon={station.lon} />
-              </section>
+              <StationDetails station={station} />
             </div>
           </>
         )}

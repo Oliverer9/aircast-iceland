@@ -225,7 +225,6 @@ a {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 0.75rem;
-  margin-top: 0.5rem;
 }
 .near-me {
   display: inline-flex;
@@ -272,37 +271,42 @@ select {
   padding: 1.25rem 1.5rem;
 }
 
-/* Phones: map, then the station's details, then the forecast. */
+/* Phones: everything in one column, in the order of the code. */
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
+    'forecast'
     'map'
-    'details'
-    'forecast';
+    'picker'
+    'details';
   gap: 1.25rem;
   margin-top: 1rem;
   align-items: start;
 }
+.forecast-card {
+  grid-area: forecast;
+}
 .map-card {
   grid-area: map;
+}
+.station-picker {
+  grid-area: picker;
 }
 .details-card {
   grid-area: details;
 }
-.forecast-card {
-  grid-area: forecast;
-}
-/* Wide screens: the map leads, the forecast fills the space under it, and the details
-   run down the right. The second row is flexible, so the tall details panel stretches
-   that row instead of leaving a gap between the map and the forecast. */
+/* Wide screens: the forecast across the top, the map with the station picker under it on
+   the left, and the details down the right. The last row is flexible, so the tall details
+   panel stretches that row instead of leaving a gap between the map and the picker. */
 @media (min-width: 60rem) {
   .layout {
     grid-template-columns: minmax(0, 3fr) minmax(20rem, 2fr);
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto auto 1fr;
     grid-template-areas:
+      'forecast forecast'
       'map details'
-      'forecast details';
+      'picker details';
   }
 }
 
@@ -596,8 +600,9 @@ td {
   margin-top: 0.5rem;
 }
 
-/* Forecast: the eight 3-hour steps as a grid, two rows of four, so it never scrolls
-   sideways. Very narrow phones get four rows of two. */
+/* Forecast: the eight 3-hour steps in one row across the top on wide screens. Narrower
+   screens get two rows of four, and very narrow phones four rows of two, so it never
+   scrolls sideways. */
 .forecast {
   list-style: none;
   margin: 0.25rem 0 0;
@@ -605,6 +610,11 @@ td {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.5rem;
+}
+@media (min-width: 60rem) {
+  .forecast {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
 }
 @media (max-width: 26rem) {
   .forecast {
