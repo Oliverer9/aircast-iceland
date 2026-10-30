@@ -5,4 +5,8 @@ export const LEVEL_NAMES = ['Good', 'Fair', 'Moderate', 'Poor', 'Very poor', 'Ex
 export const NO_INDEX_COLOR = '#9e9e9e';
 
 export const levelColor = (level) => (level ? LEVEL_COLORS[level.index] : NO_INDEX_COLOR);
+
+// Text on a level colour: dark on the light ones (5.1:1 or more), white on the two
+// darkest, Very poor and Extremely poor (8.7:1 or more).
+export const levelTextColor = (level) => (level && level.index >= 4 ? '#fff' : '#10202f');
 export const levelName = (level) => (level ? level.label : 'No index');

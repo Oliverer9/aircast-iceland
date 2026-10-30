@@ -43,17 +43,16 @@ export default function App() {
 
             <div className="layout">
               <section className="card map-card" aria-labelledby="map-heading">
-                <h2 id="map-heading">Map of stations</h2>
-                <p className="muted small">Pick a station on the map or in the list above. Scroll on the map to zoom. Click anywhere else on
-                  the map to see the weather from the nearest weather station.</p>
-                <div className="map-controls">
+                <div className="card-head">
+                  <h2 id="map-heading">Map of stations</h2>
                   <button type="button" className="toggle" aria-pressed={showWind} onClick={() => setShowWind(!showWind)}>
                     Wind animation
                   </button>
-                  <p className="muted small">
-                    The moving streaks follow the wind measured right now at {data.wind.length} weather stations.
-                  </p>
                 </div>
+                <p className="muted small map-hint">
+                  Pick a station dot, or click anywhere for the nearest weather. Scroll to zoom. The streaks follow the
+                  wind measured right now at {data.wind.length} weather stations.
+                </p>
                 <StationMap
                   stations={data.stations}
                   wind={data.wind}

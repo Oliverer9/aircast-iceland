@@ -51,6 +51,10 @@ export default function SiteHeader({ data }) {
           </div>
         )}
       </div>
+      {/* A soft wave along the bottom edge, in the page colour. Decorative. */}
+      <svg className="header-wave" viewBox="0 0 1440 40" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 40V22C240 2 480 2 720 18s480 20 720 0v22z" fill="currentColor" />
+      </svg>
     </header>
   );
 }

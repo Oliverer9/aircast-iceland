@@ -38,18 +38,25 @@ export default function ClickWeather({ weatherStations }) {
     <Popup position={latlng} eventHandlers={{ remove: () => setClicked(null) }}>
       <div className="click-weather">
         <p className="click-weather-title">Weather near here</p>
-        <p className="muted">
+        <p className="muted small">
           {station.name}, {number(km)} km away, at {clock(station.time)} UTC
           {km > FAR_KM && <strong> (far from where you clicked)</strong>}
         </p>
-        <dl>
-          <dt>Temperature</dt>
-          <dd>{station.temperature !== null ? `${number(station.temperature)} °C` : 'Not measured'}</dd>
-          <dt>Wind</dt>
-          <dd>
-            {number(station.wind)} m/s{station.direction && ` from ${station.direction}`}
-            {station.gusts !== null && `, gusts ${number(station.gusts)} m/s`}
-          </dd>
+        <dl className="weather-tiles compact">
+          <div className="tile">
+            <dt>Temperature</dt>
+            <dd className="tile-value">
+              {station.temperature !== null ? `${number(station.temperature)} °C` : 'Not measured'}
+            </dd>
+          </div>
+          <div className="tile">
+            <dt>Wind</dt>
+            <dd className="tile-value">{number(station.wind)} m/s</dd>
+            <dd className="small muted">
+              {station.direction && `from ${station.direction}`}
+              {station.gusts !== null && `${station.direction ? ', ' : ''}gusts ${number(station.gusts)} m/s`}
+            </dd>
+          </div>
         </dl>
       </div>
     </Popup>
