@@ -26,6 +26,13 @@ footer {
 
 h1 {
   font-size: 2rem;
+  margin-bottom: 0.25rem;
+}
+
+.tagline {
+  margin-top: 0;
+  font-size: 1.125rem;
+  color: var(--muted);
 }
 
 .skip-link {

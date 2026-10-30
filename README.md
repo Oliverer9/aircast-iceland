@@ -1,9 +1,10 @@
-# Connecting to the World
+# AirCast Iceland
 
-Vefskólinn, Module 4 guide: https://io.vefskoli.is/guides/653a73397a41e11fa6e5423f
+Air quality and weather in Iceland, live. Made for the Vefskólinn Module 4 guide "Connecting to the World":
+https://io.vefskoli.is/guides/653a73397a41e11fa6e5423f
 
-- Live site: https://connecting-to-the-world.onrender.com/
-- Report: https://connecting-to-the-world.onrender.com/report.html
+- Live site: https://aircast-iceland.onrender.com/
+- Report: https://aircast-iceland.onrender.com/report.html
 
 Requirements: at least **two APIs**, **one MCP server**, at least **one skill** (used or written),
 and a **report** explaining every decision. The live site must link to both the site and the report.

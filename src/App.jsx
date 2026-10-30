@@ -21,7 +21,8 @@ export default function App() {
     <>
       <a className="skip-link" href="#main">Skip to content</a>
       <header>
-        <h1>Air quality and wind in Iceland</h1>
+        <h1>AirCast Iceland</h1>
+        <p className="tagline">Air quality and weather in Iceland, live.</p>
       </header>
       <main id="main">
         <div role="status">
