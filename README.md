@@ -2,6 +2,9 @@
 
 Vefskólinn, Module 4 guide: https://io.vefskoli.is/guides/653a73397a41e11fa6e5423f
 
+- Live site: https://connecting-to-the-world.onrender.com/
+- Report: https://connecting-to-the-world.onrender.com/report.html
+
 Requirements: at least **two APIs**, **one MCP server**, at least **one skill** (used or written),
 and a **report** explaining every decision. The live site must link to both the site and the report.
 
