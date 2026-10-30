@@ -1,15 +1,15 @@
 :root {
   --bg: #f2f5f8;
   --text: #10202f;
-  --muted: #4a5a6a; /* 6.9:1 on white, 6.3:1 on the page background */
+  --muted: #4a5a6a; /* 7.1:1 on white, 6.5:1 on the page background */
   --card: #fff;
   --line: #d5dde5; /* card edges, decoration only */
   --border: #767676; /* controls and bars: 4.5:1 on white */
-  --accent: #0b5cad; /* links, buttons and focus: 6.4:1 on white */
+  --accent: #0b5cad; /* links, buttons and focus: 6.7:1 on white */
   --header-bg: #0b2239;
   --header-text: #fff;
-  --header-muted: #c7d6e4; /* 10:1 on the header */
-  --header-focus: #8cc8ff; /* focus ring on the dark header: 9:1 */
+  --header-muted: #c7d6e4; /* 7.9:1 at the header's lighter end */
+  --header-focus: #8cc8ff; /* focus ring on the dark header: 6.6:1 at its lighter end */
   --error: #b00020;
   --radius: 0.875rem;
   --shadow: 0 1px 2px rgba(16, 32, 47, 0.06), 0 6px 20px rgba(16, 32, 47, 0.06);
