@@ -199,7 +199,12 @@
           list instead of being typed in. The XML is simple and flat, so a small regex parser reads it. Where it sits
           took a few tries: first inside the station panel, then its own card under the map, and finally a
           full-width card at the top, with the station picker and "Near me" moved into the space under the map.
-          On wide screens the 8 time steps are one row; narrower screens get two rows of four, and phones four rows
+          Each step has a small drawn weather icon (sun, moon, cloud, rain, showers, sleet, snow, thunder,
+          fog). The server picks the icon from Veðurstofa's English wording even when the page is in Icelandic,
+          because the English uses steady words ("Rain showers") and the two languages list the same conditions
+          one for one (checked: 737 "Overcast" and 737 "Alskýjað"). Clear and partly cloudy skies get a moon instead
+          of a sun at night, using rough Reykjavík daylight hours per month. The icons are decorative; the condition
+          is always written beside them. On wide screens the 8 time steps are one row; narrower screens get two rows of four, and phones four rows
           of two, so it never scrolls sideways. On phones the forecast goes to the bottom instead, so the map is
           the first thing you see. The page's code is in the desktop order (forecast, map, picker, details), and the
           forecast has no buttons or links, so the keyboard moves through the page in the order it looks on both.
@@ -353,6 +358,10 @@
         <li>
           <strong>Drawn on a canvas</strong> in its own map layer, between the map and the station markers, so it
           never covers or blocks the markers.
+        </li>
+        <li>
+          <strong>Slowed down by a third</strong> after trying it (0.08 instead of 0.12 pixels per frame for each
+          m/s of wind), with the trails fading a little more slowly so they stay about as long on screen.
         </li>
         <li>
           <strong>Hides while the map is dragged or zoomed</strong>, then starts again. The streaks are stored as

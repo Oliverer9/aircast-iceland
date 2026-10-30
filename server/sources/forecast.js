@@ -38,9 +38,30 @@ function parseForecasts(xml) {
   }));
 }
 
+// Which icon fits a condition. Read from the English wording, which uses steady words
+// (checked 30.10.2026: Overcast, Cloudy, Partly cloudy, Clear sky, Light rain, Rain,
+// Rain showers, Light sleet, Sleet, Sleet showers, Light snow, Snow). The Icelandic
+// forecast is the same list in the same order, one for one.
+function iconFor(englishCondition) {
+  const c = (englishCondition ?? '').toLowerCase();
+  if (c.includes('thunder')) return 'thunder';
+  if (c.includes('snow')) return 'snow';
+  if (c.includes('sleet')) return 'sleet';
+  if (c.includes('shower')) return 'showers';
+  if (c.includes('rain') || c.includes('drizzle')) return 'rain';
+  if (c.includes('fog') || c.includes('mist') || c.includes('haze')) return 'fog';
+  if (c.includes('clear')) return 'clear';
+  if (c.includes('partly')) return 'partly-cloudy';
+  if (c.includes('cloud') || c.includes('overcast')) return 'cloudy';
+  return 'cloudy';
+}
+
 async function getPlaces(lang) {
   const hit = cache.get(lang);
   if (hit && Date.now() - hit.at < CACHE_MS) return hit.places;
+
+  // The icons come from the English wording, so another language needs it too.
+  const english = lang === 'en' ? null : await getPlaces('en');
 
   const [xml, stations] = await Promise.all([
     fetchText(`${XML_URL}&lang=${lang}&ids=${PLACES.join(';')}`),
@@ -51,7 +72,15 @@ async function getPlaces(lang) {
   const places = parseForecasts(xml)
     .map((place) => {
       const match = active.find((s) => s.station === place.id) ?? active.find((s) => s.name === place.name);
-      return match ? { ...place, lat: match.lat, lon: match.lon } : null;
+      if (!match) return null;
+      const englishPlace = english?.find((p) => p.id === place.id);
+      const forecasts = place.forecasts.map((f) => {
+        const englishCondition = englishPlace
+          ? englishPlace.forecasts.find((e) => e.time === f.time)?.condition
+          : f.condition;
+        return { ...f, icon: iconFor(englishCondition) };
+      });
+      return { ...place, forecasts, lat: match.lat, lon: match.lon };
     })
     .filter(Boolean);
 

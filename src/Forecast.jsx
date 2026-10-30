@@ -1,5 +1,6 @@
 import { useApi } from './useApi.js';
 import { useText } from './i18n.jsx';
+import WeatherIcon from './WeatherIcon.jsx';
 
 // The next 24 hours, every 3 hours, from Veðurstofa's forecast for the nearest forecast place.
 // The forecast service writes its own text (conditions, directions) in the chosen language.
@@ -29,7 +30,10 @@ export default function Forecast({ lat, lon }) {
           return (
             <li key={step.time}>
               <span className="forecast-time">{step.time.slice(11, 16)}</span>
-              <span className="forecast-temp">{number(step.temperature)}°</span>
+              <span className="forecast-main">
+                <WeatherIcon type={step.icon} time={step.time} />
+                <span className="forecast-temp">{number(step.temperature)}°</span>
+              </span>
               <span className="forecast-wind">
                 {degrees !== null && (
                   <svg className="wind-arrow small-arrow" viewBox="0 0 24 24" aria-hidden="true" style={{ transform: `rotate(${degrees + 180}deg)` }}>

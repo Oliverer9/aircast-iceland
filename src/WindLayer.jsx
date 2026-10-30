@@ -13,8 +13,9 @@ import L from 'leaflet';
 
 const GRID = { south: 63.2, north: 66.6, west: -24.6, east: -13.4, latStep: 0.05, lonStep: 0.1 };
 const MAX_DISTANCE_KM = 40;
-const PIXELS_PER_MS = 0.12; // how far a particle moves per frame for each m/s of wind
-const MAX_AGE = 90; // frames before a particle starts again somewhere else
+const PIXELS_PER_MS = 0.08; // how far a particle moves per frame for each m/s of wind
+const MAX_AGE = 120; // frames before a particle starts again somewhere else
+const FADE = 0.95; // how much of the old trail stays each frame (higher = longer trails)
 
 function distanceKm(lat1, lon1, lat2, lon2) {
   // Flat-earth approximation; plenty accurate over 40 km.
@@ -114,7 +115,7 @@ export default function WindLayer({ wind, color }) {
 
       // Fade what was drawn before, so each particle leaves a short trail.
       ctx.globalCompositeOperation = 'destination-in';
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.93)';
+      ctx.fillStyle = `rgba(0, 0, 0, ${FADE})`;
       ctx.fillRect(0, 0, size.x, size.y);
       ctx.globalCompositeOperation = 'source-over';
 
