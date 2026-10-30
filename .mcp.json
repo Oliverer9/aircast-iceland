@@ -1,0 +1,15 @@
+{
+	"mcpServers": {
+		"vedurstofa": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"-y",
+				"vedurstofa-mcp@1.0.1"
+			],
+			"tools": [
+				"*"
+			]
+		}
+	}
+}

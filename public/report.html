@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Report – Connecting to the World</title>
+    <style>
+      body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 48rem; margin: 0 auto; padding: 1rem; color: #1a1a1a; background: #fafafa; }
+      a { color: #0050b3; }
+      :focus-visible { outline: 3px solid #0050b3; outline-offset: 2px; }
+      .shots { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; }
+      figure { margin: 0; max-width: 16rem; }
+      figure img { max-width: 100%; height: auto; border: 1px solid #767676; }
+      figcaption { font-size: 0.875rem; color: #555; }
+      dt { font-weight: 600; margin-top: 0.75rem; }
+      dd { margin-left: 1.5rem; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <p><a href="/">Back to the site</a></p>
+      <h1>Report: decisions and why</h1>
+    </header>
+    <main>
+      <h2>About this project</h2>
+      <p>
+        <strong>Air quality and wind in Iceland</strong>, for the Vefskólinn Module 4 guide "Connecting to the
+        World". It combines live air quality from Loftgæði with live weather from Veðurstofa Íslands: a map of
+        every air quality station coloured by the European Air Quality Index, a panel with one coloured bar per
+        pollutant and the wind nearby, faint pollution clouds, and moving wind streaks.
+      </p>
+      <ul>
+        <li>Live site: TODO, add the address after deploying.</li>
+        <li>Source code: TODO, add the GitHub repository.</li>
+        <li>Built with React and Vite for the page, Express for the server, and Leaflet for the map.</li>
+      </ul>
+      <p>
+        Most of the code was written by an AI coding agent (Claude Code), and this report was written by it as
+        the guide asks, with every decision and the reason for it. GitHub Copilot in VS Code was the agent that
+        used the MCP server and the skill. I tested the results and checked claims against the real data;
+        where something was <em>not</em> verified, the report says so.
+      </p>
+
+      <h2>API, MCP server and skill: what's the difference?</h2>
+      <dl>
+        <dt>API (Loftgæði, Veðurstofa)</dt>
+        <dd>
+          How <strong>the website</strong> gets data. The server sends an HTTP request to an address such as
+          <code>api.vedur.is/weather/...</code> and gets JSON back. It runs every time someone uses the site, with no
+          AI involved.
+        </dd>
+        <dt>MCP server (vedurstofa-mcp)</dt>
+        <dd>
+          How <strong>the AI agent</strong> gets tools. It plugs into Copilot, not into the website, and gives the
+          agent functions like <code>get_weather_now</code> that it can ask to run. The agent only asks; the
+          MCP server runs the code, and I approve each call. It used the same Veðurstofa data while I was
+          building.
+        </dd>
+        <dt>Skill (verify-weather-data)</dt>
+        <dd>
+          Instructions that change <strong>how the agent behaves</strong>. It is a Markdown file the agent loads
+          when a question matches its description. It doesn't give the agent any new abilities, but it tells it
+          how to use the ones it has: in this case, to check the time and the API before trusting a tool's answer.
+        </dd>
+      </dl>
+      <p>
+        In short: the API feeds the website, the MCP server gives the agent hands, and the skill gives the agent
+        habits.
+      </p>
+
+      <h2>APIs</h2>
+      <p>
+        <strong>Loftgæði</strong> (air quality, Umhverfis- og orkustofnun) and <strong>Veðurstofa Íslands</strong>
+        (weather observations). Wind decides whether pollution stays or blows away, so the two belong together.
+        Both were tested live on 28.10.2026: both return 200, need no key and send
+        <code>Access-Control-Allow-Origin: *</code>.
+      </p>
+      <h3>How they are combined</h3>
+      <p>
+        The two APIs number their stations differently, so there is no shared id. Both station lists have
+        coordinates, so the server matches each air quality station to the nearest active weather station using
+        the haversine distance. In testing every match was within 10 km.
+      </p>
+      <h3>Decisions</h3>
+      <ul>
+        <li>
+          <strong>Fetch on the server, even though CORS would allow the browser.</strong> The join needs four
+          requests (readings and station lists from each API); doing it once on the server keeps the page to one
+          request and keeps the pattern ready for an API that needs a key.
+        </li>
+        <li>
+          <strong>Cache for 5 minutes.</strong> Weather updates every 10 minutes and air quality every hour, so
+          calling both APIs on every page load would only add load on their servers.
+        </li>
+        <li>
+          <strong>Show every pollutant a station measures.</strong> Stations measure different things (dust, NO₂,
+          SO₂, H₂S), and a fixed set left many stations empty.
+        </li>
+        <li>
+          <strong>Negative readings are shown as 0.</strong> Sensors read slightly below zero when there is almost
+          nothing in the air.
+        </li>
+        <li>
+          <strong>Leave out stations that are not reporting</strong>, and weather stations that have closed
+          (<code>ending</code> is not null) or have no wind reading.
+        </li>
+      </ul>
+      <h3>Rate limits, keys and errors</h3>
+      <ul>
+        <li>
+          <strong>No documented rate limits.</strong> Neither API's documentation mentions limits, quotas or terms,
+          and neither sends rate-limit headers (checked 30.10.2026). That doesn't mean there are none, so the site
+          is built to be polite anyway.
+        </li>
+        <li>
+          <strong>The 5-minute cache sets the load.</strong> However many people use the site, the server calls
+          each API at most twice every 5 minutes (readings and station list), about 24 requests an hour per API.
+          The data doesn't change faster than that: Veðurstofa updates every 10 minutes, and Loftgæði hourly at
+          about 17 minutes past the hour.
+        </li>
+        <li>
+          <strong>No keys.</strong> Both APIs are open. The server is still set up to read keys from a
+          <code>.env</code> file that is never committed, if a later API needs one.
+        </li>
+        <li>
+          <strong>Errors.</strong> Each request gives up after 8 seconds. If an API fails, the server logs the
+          real error and sends the page a short, friendly message, which the page shows in place of the data.
+        </li>
+      </ul>
+
+      <h2>Map and pollution levels</h2>
+      <p>
+        The site shows every air quality station on a map, coloured by how polluted the air is, and a separate
+        panel for the chosen station with one coloured bar per pollutant.
+      </p>
+      <h3>Which scale for "how bad"</h3>
+      <ul>
+        <li>
+          <strong>European Air Quality Index</strong> from the European Environment Agency, with six levels from
+          Good to Extremely poor, based on hourly values of PM2.5, PM10, NO₂, O₃ and SO₂. The limits were copied
+          from the EEA's own index page (airindex.eea.europa.eu), checked 29.10.2026, and live in
+          <code>server/airIndex.js</code>.
+        </li>
+        <li>
+          <strong>Considered: loftgaedi.is's own scale.</strong> It only publishes numbers for SO₂, and that table is
+          built for short volcanic gas peaks (10–15 minutes). It is much looser than the EEA scale ("Good" goes up to
+          350 µg/m³ against 20–40 in the EEA index). One scale for all pollutants was easier to read and compare.
+        </li>
+        <li>
+          <strong>Values between bands.</strong> The EEA writes the limits as whole numbers (PM2.5 0–5, 6–15…), so
+          5.5 doesn't fit anywhere. A value belongs to the first level whose upper limit it doesn't exceed, so 5.5
+          counts as Fair.
+        </li>
+        <li>
+          <strong>A station is as bad as its worst pollutant</strong>, which is how the EEA index works too.
+        </li>
+        <li>
+          <strong>H₂S, PM1 and CO have no level.</strong> The EEA index doesn't cover them. On 29.10.2026 nine stations
+          only measured H₂S (mostly near geothermal areas), so they are grey and labelled "No index". Their values are still
+          shown, but no colour is invented for them.
+        </li>
+        <li>
+          <strong>Colour is never the only clue.</strong> Each level name is written next to its colour in the
+          legend, the bars, the dropdown and the marker tooltips. Markers and bars have a dark outline so the light
+          colours stand out from the map and the background.
+        </li>
+      </ul>
+      <h3>The map</h3>
+      <ul>
+        <li>
+          <strong>Leaflet with OpenStreetMap tiles.</strong> Free, no API key and no account, and OpenStreetMap
+          only asks for the attribution shown on the map.
+        </li>
+        <li>
+          <strong>Considered: CARTO's light basemap</strong>, whose pale grey would make the level colours stand out
+          more. Tested it, and its tiles now only say "API KEY REQUIRED", so OpenStreetMap stayed. Older tutorials
+          (and the AI's memory) still list it as keyless.
+        </li>
+        <li>
+          <strong>Scroll to zoom</strong> is on, and the map can be dragged up to half of Iceland's size past the
+          coast in every direction, but no further (<code>maxBounds</code>). At first the limit was Iceland's own
+          outline, which felt too tight. Zoom moves in half steps so the stations fill the box better.
+        </li>
+        <li>
+          <strong>Pollution clouds.</strong> Each station with a level gets a faint, blurred circle in its level
+          colour, under the wind and the markers. It is 5 km in radius, as a hint of the area around the station,
+          since a station only measures the air where it stands. Zoomed out, 5 km is only a few pixels and hid
+          under the marker, so a cloud never gets smaller than 30 px across on screen. Stations with no index get
+          no cloud, so no colour is made up for them.
+        </li>
+        <li>
+          <strong>The dropdown stays</strong> as another way to pick a station. Reykjavík's stations sit close
+          together on the map, and a list is easier for screen reader users.
+        </li>
+      </ul>
+      <h3>Wind animation</h3>
+      <p>
+        Inspired by the wind map on icelandweather.is, where moving streaks follow the wind measured right now.
+        Wind is what moves pollution around, so it belongs on the same map as the air quality stations.
+      </p>
+      <ul>
+        <li>
+          <strong>Uses the same Veðurstofa call the site already makes</strong>: the server now also sends wind
+          speed and direction from every weather station (about 270), which added about 40 KB to the response.
+        </li>
+        <li>
+          <strong>From points to a wind field.</strong> The stations are spread over a grid covering Iceland. Each
+          grid point gets a weighted average of the stations within 40 km, where closer stations count more
+          (inverse distance weighting). Points with no station within 40 km get no wind, so no wind is invented
+          far out at sea.
+        </li>
+        <li>
+          <strong>Direction.</strong> Veðurstofa gives the direction the wind comes <em>from</em> (166° means from
+          the south-southeast), so the streaks move the opposite way.
+        </li>
+        <li>
+          <strong>Drawn on a canvas</strong> in its own map layer, between the map and the station markers, so it
+          never covers or blocks the markers.
+        </li>
+        <li>
+          <strong>Hides while the map is dragged or zoomed</strong>, then starts again. The streaks are stored as
+          screen pixels, which stop matching the map as soon as it moves.
+        </li>
+        <li>
+          <strong>Tried and reverted: wind that keeps moving during drag and zoom.</strong> A later version stored
+          the streaks as map positions so they could keep flowing while the map moved. It needed several rounds of
+          fixes (streaks jumping during Leaflet's zoom animation, stretching after a zoom, lagging while dragging),
+          and a change to time-based speed made the streaks look worse. The first version looked best, so it was
+          restored. Lesson: each fix was reasonable on its own, but the simpler version was the better product.
+        </li>
+        <li>
+          <strong>Can be turned off</strong> with a button (WCAG asks for a way to pause anything that moves for more
+          than five seconds), and it starts off for people whose system asks for reduced motion.
+        </li>
+        <li>
+          <strong>Testing problem:</strong> the test browser was hidden, and hidden browsers don't run animations at
+          all (0 frames per second). To check the drawing, the animation was run on a timer instead while testing.
+          The reduced-motion setting couldn't be tested there.
+        </li>
+      </ul>
+      <h3>What went wrong and how it was found</h3>
+      <ul>
+        <li>
+          <strong>The map opened zoomed all the way in</strong> (zoom 17, no stations visible). Leaflet measured the
+          map box before the layout had its final size, so fitting the stations zoomed to the maximum. Fixed by
+          calling <code>invalidateSize()</code> before <code>fitBounds()</code>.
+        </li>
+        <li>
+          <strong>The map still didn't load properly on my computer</strong> unless I zoomed in. It couldn't be
+          reproduced in the test browser, so the fix had to cover the likely cause: the map box changing size after
+          the map started, which Leaflet doesn't notice by itself. Now a <code>ResizeObserver</code> re-measures
+          the map every time its box changes size, and the map always starts from a view of all of Iceland.
+          Confirmed working on my computer afterwards.
+        </li>
+        <li>
+          <strong>Markers could be focused with Tab, but Enter did nothing.</strong> Leaflet makes markers into
+          buttons but doesn't select them from the keyboard. Found by testing with the keyboard; fixed by handling
+          Enter and Space.
+        </li>
+        <li>
+          <strong>The page was 27 px too wide on a phone</strong> because the dropdown grew to fit the longest
+          station name. Fixed with <code>max-width: 100%</code>.
+        </li>
+      </ul>
+
+      <h2>MCP server</h2>
+      <p>
+        <strong>vedurstofa-mcp</strong> v1.0.1 by sandsower (unofficial). It gives the coding agent six tools built on
+        the same Veðurstofa data the site uses: current weather, forecasts, text forecasts, weather warnings,
+        earthquakes and a station list. It runs locally over stdio and is connected to GitHub Copilot in VS Code
+        through <code>.mcp.json</code> in this project. It plugs into the agent, not into the website.
+        (It started in <code>.vscode/mcp.json</code>; during the project VS Code asked to migrate MCP settings to
+        <code>.mcp.json</code>, the same file name other agents such as Claude Code use.)
+      </p>
+      <h3>Checked before running it</h3>
+      <ul>
+        <li>No install scripts. Three dependencies: the official MCP SDK, zod and node-html-parser.</li>
+        <li>The code only contacts <code>vedur.is</code> and <code>api.vedur.is</code>. It does not start other
+          programs, write files or read secrets; the only environment variable it reads turns on debug logging.</li>
+        <li>It ships a certificate file. It is GlobalSign's real intermediate certificate (valid to May 2027), which
+          vedur.is does not send itself. The server adds it to its own trusted list, so certificate checking stays
+          on.</li>
+        <li>All six tools only read data.</li>
+      </ul>
+      <h3>Decisions</h3>
+      <ul>
+        <li><strong>Pinned to version 1.0.1</strong>, the version that was read, so a later update can't run new code
+          without anyone looking at it first.</li>
+        <li><strong>Earthquakes tool:</strong> the course notes say <code>get_earthquakes</code> fails with 422
+          unless it is called with <code>include_unreviewed: true</code>.</li>
+      </ul>
+      <h3>Test: "What's the weather in Reykjavík right now?" (29.10.2026)</h3>
+      <p>
+        The chat only showed "Search Tools", not which tool answered. VS Code's own log shows the full sequence:
+        Copilot searched its tools and found the six <code>vedurstofa</code> tools, started
+        <code>vedurstofa-get_weather_now</code>, asked for permission, got <code>approve-once</code>, and the tool
+        finished 0.6 seconds later. Permission was given once rather than for the whole workspace, so every new call
+        has to be approved.
+      </p>
+      <table>
+        <thead>
+          <tr><th scope="col"></th><th scope="col">Copilot via MCP</th><th scope="col">Veðurstofa API directly</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Time (UTC)</th><td>23:00</td><td>22:40</td></tr>
+          <tr><th scope="row">Temperature</th><td>6.4 °C</td><td>6.2 °C</td></tr>
+          <tr><th scope="row">Wind</th><td>S 4.8 m/s, gusts 8.3</td><td>SSE 3.6 m/s, gusts 6.1</td></tr>
+          <tr><th scope="row">Humidity</th><td>84 %</td><td>85 %</td></tr>
+          <tr><th scope="row">Pressure</th><td>1002.8 hPa</td><td>1002.85 hPa</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Pressure and humidity match. The time does not: the question was asked at 22:39 UTC, so an observation
+        "from 23:00" is impossible. Copilot's own reasoning noticed this ("an inconsistency between the observed
+        time and current datetime") but still told the user "Observed at 23:00". It was only caught by checking
+        the API directly, which is why AI answers need evidence and not just trust.
+      </p>
+      <div class="shots">
+        <figure>
+          <img src="/images/copilot-answer.png" width="256" height="514"
+            alt="Copilot's answer: in Reykjavík 6.4 °C, southerly wind 4.8 m/s with gusts up to 8.3 m/s, humidity 84 %, pressure 1002.8 hPa, observed at 23:00 UTC on October 29, 2026 by the Icelandic Met Office." />
+          <figcaption>Copilot's answer, saying the observation is from 23:00 UTC.</figcaption>
+        </figure>
+        <figure>
+          <img src="/images/copilot-reasoning.png" width="250" height="796"
+            alt="Copilot's expanded steps: it searched for tools, then its reasoning notes an inconsistency between an observation from 23:00 UTC and the current time of 22:39 UTC." />
+          <figcaption>Copilot's reasoning, where it notices the time can't be right.</figcaption>
+        </figure>
+      </div>
+      <h2>Skill</h2>
+      <p>
+        <strong>verify-weather-data</strong>, written for this project, in
+        <code>.agents/skills/verify-weather-data/SKILL.md</code> (the folder VS Code reads skills from).
+      </p>
+      <h3>Why this skill</h3>
+      <p>
+        The MCP test above showed a real weakness: the tool reported an observation "from 23:00" at 22:39,
+        Copilot noticed the problem in its own reasoning, and still told the user "Observed at 23:00". The skill
+        targets exactly that. It tells the agent to:
+      </p>
+      <ol>
+        <li>find out the current time (UTC, which Iceland uses all year);</li>
+        <li>get the data;</li>
+        <li>treat any "observation" from the future as a forecast or a mistake, and say how old stale data is;</li>
+        <li>check one value against Veðurstofa's or Loftgæði's API directly;</li>
+        <li>answer with units, station, time and source, plus a <strong>Checks</strong> line, and never leave
+          out a problem it noticed.</li>
+      </ol>
+      <h3>How it is built</h3>
+      <ul>
+        <li>
+          <strong>The description decides when it is used.</strong> Copilot only reads the
+          <code>name</code> and <code>description</code> until a question matches; then it loads the rest. So the
+          description names the situations (current weather, wind, temperature, air quality in Iceland) and the
+          tools and APIs (vedurstofa MCP, api.vedur.is, api.ust.is).
+        </li>
+        <li>
+          <strong>Short and concrete:</strong> 64 lines, with the exact API addresses and field names, so the
+          agent doesn't have to guess them (the course warns that agents remember old, dead APIs).
+        </li>
+        <li>
+          <strong>An example answer</strong> showing the 23:00 case handled correctly.
+        </li>
+      </ul>
+      <h3>Before and after</h3>
+      <p>
+        <strong>Before</strong> (no skill, 29.10.2026): see the MCP test above. The impossible time was reported
+        as fact, and nothing was checked against the API.
+      </p>
+      <p>
+        <strong>After</strong> (with the skill, 30.10.2026 at about 00:20 UTC), same question in a new Agent chat:
+      </p>
+      <ul>
+        <li>The first step in the chat is <strong>"Read skill: verify-weather-data"</strong>, so Copilot matched the
+          question to the skill's description and loaded it. It then stated the skill's plan (check the UTC time,
+          fetch the reading, cross-check with Veðurstofa's API) and ran the PowerShell time command from step 1.</li>
+        <li>Copilot asked to use the vedurstofa tool and then to <strong>fetch</strong> <code>api.vedur.is</code>
+          directly. It didn't do that check before the skill.</li>
+        <li>It gave the station, the observation time in UTC, the source, and how old the reading was
+          ("about 1 minute old as of 00:20:46 UTC").</li>
+        <li>Its <strong>Checks</strong> line said the MCP tool reported 01:00 UTC, "which is in the future relative
+          to the current time, so that observation timestamp was disregarded", and that the API reading was used
+          instead.</li>
+        <li>Before the skill, Copilot noticed the impossible time only in its hidden reasoning and left it out of
+          the answer. This time the problem is in the answer itself, which is what the skill's "never leave out a
+          problem you noticed" rule is for.</li>
+        <li><strong>Verified independently:</strong> the API's newest Reykjavík reading at 00:27 UTC was 00:20,
+          5.12 °C, 3.08 m/s from SE (137°), gusts 4.51 m/s, humidity 84 %, pressure 1003.88 hPa. Every number in
+          the answer matches.</li>
+      </ul>
+      <div class="shots">
+        <figure>
+          <img src="/images/copilot-skill-steps.png" width="283" height="788"
+            alt="Copilot's steps with the skill: Read skill verify-weather-data; then it says it will check the current UTC time, fetch Reykjavík's live station reading and cross-check it against Veðurstofa's API; it considers using web fetch; then it runs a PowerShell command that gets the current UTC time." />
+          <figcaption>With the skill: Copilot loads it first, then follows its steps.</figcaption>
+        </figure>
+        <figure>
+          <img src="/images/copilot-skill-answer.png" width="250" height="538"
+            alt="Copilot's answer with the skill: Reykjavík station 1470, observed 00:20 UTC via Veðurstofa API, 5.1 °C, wind 3.1 m/s from SE (137°), gusts 4.5 m/s, humidity 84 %, pressure 1003.9 hPa, about 1 minute old. Checks: the direct 10-minute API reading was used; the structured weather tool reported 01:00 UTC, which is in the future, so that timestamp was disregarded." />
+          <figcaption>With the skill: the impossible time is caught and explained.</figcaption>
+        </figure>
+      </div>
+      <h3>What this showed about the MCP server</h3>
+      <p>
+        The future timestamp happened twice: "23:00" at 22:39 and "01:00" at 00:20. Both times it was the next
+        whole hour, so it looks like a real bug in vedurstofa-mcp's <code>get_weather_now</code> (perhaps rounding
+        the time up, or labelling an hourly value by the end of its hour), not a one-off. That would be worth
+        reporting to the project on GitHub. The skill doesn't fix the tool, but it stops the agent from passing
+        the wrong time on.
+      </p>
+      <h2>What the AI got wrong, and how it was caught</h2>
+      <p>
+        The guide asks about the limits of AI-generated code. These are the times the AI (or a tool it used) was
+        wrong or unsure, and what showed it:
+      </p>
+      <ul>
+        <li>
+          <strong>Out-of-date knowledge:</strong> CARTO's basemap was used as "keyless", but its tiles said
+          "API KEY REQUIRED". Caught by looking at the result.
+        </li>
+        <li>
+          <strong>A tool giving wrong data:</strong> the vedurstofa MCP server reported observation times from the
+          future, twice. Caught by comparing with the API directly, then handled with a skill.
+        </li>
+        <li>
+          <strong>Code that worked in one test but not another:</strong> the map loaded properly in the AI's test
+          browser but not on my computer. Caught by testing on my own screen. Map markers could also be reached
+          with Tab but not chosen with Enter, which the AI caught by testing with the keyboard.
+        </li>
+        <li>
+          <strong>Fixes that made it worse:</strong> the wind animation went through several "improvements" that
+          I didn't like, and the first version was restored.
+        </li>
+        <li>
+          <strong>Its own claims:</strong> while writing this report, the AI first wrote that Copilot's reasoning
+          had noticed the wrong time in the skill test. The screenshot didn't show that, so the sentence was
+          changed to what the evidence shows.
+        </li>
+      </ul>
+
+      <h2>Not verified</h2>
+      <ul>
+        <li>The wind animation starting switched off for people who ask their system for reduced motion. The test
+          browser couldn't emulate that setting.</li>
+        <li>How the site behaves if one of the APIs is down for a long time; only the error path in the code was
+          checked, not a real outage.</li>
+        <li>The exact colours of the European Air Quality Index levels. The EEA page gives the limits but not the
+          colour values, so the colours follow its order (blue-green to purple) rather than its exact palette.</li>
+      </ul>
+    </main>
+  </body>
+</html>
