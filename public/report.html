@@ -32,7 +32,7 @@
         <li>Live site: <a href="https://aircast-iceland.onrender.com/">aircast-iceland.onrender.com</a>
           (free hosting on Render: after about 15 minutes without visitors it goes to sleep, and the first visit
           then takes up to a minute to load)</li>
-        <li>Source code: <a href="https://github.com/Oliverer9/connecting-to-the-world">github.com/Oliverer9/connecting-to-the-world</a></li>
+        <li>Source code: <a href="https://github.com/Oliverer9/aircast-iceland">github.com/Oliverer9/aircast-iceland</a></li>
         <li>Built with React and Vite for the page, Express for the server, and Leaflet for the map.</li>
       </ul>
       <p>
@@ -126,6 +126,31 @@
         <li>
           <strong>Errors.</strong> Each request gives up after 8 seconds. If an API fails, the server logs the
           real error and sends the page a short, friendly message, which the page shows in place of the data.
+        </li>
+      </ul>
+
+      <h2>Name and look</h2>
+      <ul>
+        <li>
+          <strong>Renamed to AirCast Iceland</strong> before making a launch film for it (the next guide), with the
+          tagline "Air quality and weather in Iceland, live." The site moved to a new address to match, and the
+          GitHub repository was renamed (GitHub redirects the old address).
+        </li>
+        <li>
+          <strong>A header that tells the story at a glance:</strong> a dark band with the name, a small cloud-and-wind
+          mark, and a live summary of how many stations are Good, Fair, Moderate and so on right now, with the time
+          of the data.
+        </li>
+        <li>
+          <strong>The map leads.</strong> On wide screens it takes about 60% of the width, with the details beside it.
+        </li>
+        <li>
+          <strong>Inter as the font, stored with the site</strong> (an npm package bundled by Vite) instead of loaded
+          from Google, so it never depends on another server. It has every Icelandic letter.
+        </li>
+        <li>
+          <strong>Contrast checked for every new colour:</strong> grey text 6.9:1 on white, the accent colour 6.4:1,
+          the header's lighter text 10:1, and a lighter focus ring inside the dark header so it stays visible there.
         </li>
       </ul>
 

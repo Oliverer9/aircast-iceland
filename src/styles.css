@@ -1,12 +1,19 @@
 :root {
-  --bg: #fafafa;
-  --text: #1a1a1a;
-  --muted: #555;
+  --bg: #f2f5f8;
+  --text: #10202f;
+  --muted: #4a5a6a; /* 6.9:1 on white, 6.3:1 on the page background */
   --card: #fff;
-  --border: #767676;
-  --focus: #0050b3;
+  --line: #d5dde5; /* card edges, decoration only */
+  --border: #767676; /* controls and bars: 4.5:1 on white */
+  --accent: #0b5cad; /* links, buttons and focus: 6.4:1 on white */
+  --header-bg: #0b2239;
+  --header-text: #fff;
+  --header-muted: #c7d6e4; /* 10:1 on the header */
+  --header-focus: #8cc8ff; /* focus ring on the dark header: 9:1 */
   --error: #b00020;
-  font-family: system-ui, sans-serif;
+  --radius: 0.875rem;
+  --shadow: 0 1px 2px rgba(16, 32, 47, 0.06), 0 6px 20px rgba(16, 32, 47, 0.06);
+  font-family: 'Inter Variable', system-ui, sans-serif;
   line-height: 1.5;
   color: var(--text);
   background: var(--bg);
@@ -16,28 +23,37 @@ body {
   margin: 0;
 }
 
-header,
 main,
-footer {
-  max-width: 72rem;
+.site-header-inner,
+.site-footer {
+  max-width: 76rem;
   margin: 0 auto;
   padding: 1rem;
 }
 
-h1 {
-  font-size: 2rem;
-  margin-bottom: 0.25rem;
+h1,
+h2,
+h3 {
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+h2 {
+  font-size: 1.375rem;
+  margin: 0 0 0.25rem;
+}
+h3 {
+  font-size: 1.0625rem;
+  margin: 1.25rem 0 0.5rem;
 }
 
-.tagline {
-  margin-top: 0;
-  font-size: 1.125rem;
-  color: var(--muted);
+a {
+  color: var(--accent);
 }
 
 .skip-link {
   position: absolute;
   left: -100vw;
+  z-index: 2000;
 }
 .skip-link:focus {
   left: 1rem;
@@ -47,15 +63,82 @@ h1 {
 }
 
 :focus-visible {
-  outline: 3px solid var(--focus);
+  outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
 
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  padding: 1rem 1.5rem;
+/* Header band */
+.site-header {
+  background: linear-gradient(135deg, #0b2239 0%, #123a5e 100%);
+  color: var(--header-text);
+}
+.site-header :focus-visible {
+  outline-color: var(--header-focus);
+}
+.site-header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  padding-top: 1.75rem;
+  padding-bottom: 1.75rem;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+.brand-mark {
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  color: #7fe3da;
+}
+.site-header h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  margin: 0;
+}
+.tagline {
+  margin: 0.125rem 0 0;
+  font-size: 1.125rem;
+  color: var(--header-muted);
+}
+.summary-title {
+  margin: 0 0 0.375rem;
+  font-size: 0.875rem;
+  color: var(--header-muted);
+}
+.summary-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.summary-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.9375rem;
+}
+.site-header .swatch {
+  border-color: #fff;
+}
+
+/* Station picker */
+.station-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  margin-top: 0.5rem;
 }
 
 label {
@@ -67,7 +150,34 @@ select {
   max-width: 100%;
   font: inherit;
   min-height: 2.75rem;
-  padding: 0 0.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--card);
+  color: var(--text);
+}
+
+/* Cards and layout */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem 1.5rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+  margin-top: 1rem;
+  align-items: start;
+}
+/* Wide screens: the map leads, the details sit beside it. */
+@media (min-width: 60rem) {
+  .layout {
+    grid-template-columns: minmax(0, 3fr) minmax(20rem, 2fr);
+  }
 }
 
 table {
@@ -84,30 +194,23 @@ td {
   padding: 0.25rem 1.5rem 0.25rem 0;
 }
 
-.layout {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-  align-items: start;
-}
-
 /* Map */
 .map-controls {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem 1rem;
-  margin-bottom: 0.5rem;
+  margin: 0.5rem 0;
 }
 .toggle {
   font: inherit;
+  font-weight: 600;
   min-height: 2.75rem;
   padding: 0 1rem 0 0.75rem;
-  border: 2px solid var(--focus);
-  border-radius: 0.5rem;
+  border: 2px solid var(--accent);
+  border-radius: 999px;
   background: var(--card);
-  color: var(--focus);
+  color: var(--accent);
   cursor: pointer;
 }
 /* The box shows the state; the name stays the same for screen readers. */
@@ -118,11 +221,11 @@ td {
   height: 0.9rem;
   margin-right: 0.5rem;
   vertical-align: -0.1rem;
-  border: 2px solid var(--focus);
+  border: 2px solid var(--accent);
   border-radius: 0.2rem;
 }
 .toggle[aria-pressed='true'] {
-  background: var(--focus);
+  background: var(--accent);
   color: #fff;
 }
 .toggle[aria-pressed='true']::before {
@@ -130,9 +233,12 @@ td {
   border-color: #fff;
 }
 .map {
-  height: 28rem;
-  border: 1px solid var(--border);
-  border-radius: 0.25rem;
+  height: 32rem;
+  border: 1px solid var(--line);
+  border-radius: 0.625rem;
+}
+.leaflet-container {
+  font-family: inherit;
 }
 /* Above the map tiles (200), below the wind (450) and markers (600). The blur turns
    the circles into soft clouds, and multiply makes them tint the map like a highlighter
@@ -159,7 +265,7 @@ td {
   border-width: 4px;
 }
 .leaflet-marker-icon:focus-visible {
-  outline: 3px solid var(--focus);
+  outline: 3px solid var(--accent);
   outline-offset: 3px;
   border-radius: 50%;
 }
@@ -179,7 +285,7 @@ td {
 /* Legend and colour swatches */
 .legend h3 {
   font-size: 1rem;
-  margin-bottom: 0.25rem;
+  margin: 1rem 0 0.375rem;
 }
 .legend ul {
   list-style: none;
@@ -198,6 +304,7 @@ td {
 .overall {
   flex-wrap: wrap;
   font-size: 1.125rem;
+  margin: 0.25rem 0 0;
 }
 .swatch {
   display: inline-block;
@@ -212,21 +319,23 @@ td {
 .bars {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 .bars li {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.875rem;
 }
 .bar-label {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 0 1rem;
+  margin-bottom: 0.25rem;
 }
 .bar-track {
-  height: 1rem;
-  background: #eee;
+  height: 0.875rem;
+  background: #eef2f6;
   border: 1px solid var(--border);
-  border-radius: 0.25rem;
+  border-radius: 999px;
   overflow: hidden;
 }
 .bar-fill {
@@ -254,11 +363,13 @@ dd {
   color: var(--error);
 }
 
-.source {
+/* Footer */
+.site-footer {
+  padding-top: 1.5rem;
+  padding-bottom: 2rem;
   font-size: 0.875rem;
   color: var(--muted);
 }
-
-a {
-  color: var(--focus);
+.site-footer p {
+  margin: 0 0 0.25rem;
 }

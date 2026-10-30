@@ -4,6 +4,7 @@ import { levelName } from './airLevels.js';
 import StationMap from './StationMap.jsx';
 import StationDetails from './StationDetails.jsx';
 import LevelLegend from './LevelLegend.jsx';
+import SiteHeader from './SiteHeader.jsx';
 
 const DEFAULT_STATION = 'STA-IS0005A'; // Reykjavík Grensás
 
@@ -20,10 +21,7 @@ export default function App() {
   return (
     <>
       <a className="skip-link" href="#main">Skip to content</a>
-      <header>
-        <h1>AirCast Iceland</h1>
-        <p className="tagline">Air quality and weather in Iceland, live.</p>
-      </header>
+      <SiteHeader data={data} />
       <main id="main">
         <div role="status">
           {status === 'loading' && <p>Loading air quality and weather…</p>}
@@ -32,17 +30,19 @@ export default function App() {
 
         {station && (
           <>
-            <label htmlFor="station">Station</label>
-            <select id="station" value={station.id} onChange={(e) => setSelectedId(e.target.value)}>
-              {data.stations.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} – {levelName(s.level)}
-                </option>
-              ))}
-            </select>
+            <div className="station-picker">
+              <label htmlFor="station">Station</label>
+              <select id="station" value={station.id} onChange={(e) => setSelectedId(e.target.value)}>
+                {data.stations.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} – {levelName(s.level)}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <div className="layout">
-              <section className="card" aria-labelledby="map-heading">
+              <section className="card map-card" aria-labelledby="map-heading">
                 <h2 id="map-heading">Map of stations</h2>
                 <p className="muted small">Pick a station on the map or in the list above. Scroll on the map to zoom. Click anywhere else on
                   the map to see the weather from the nearest weather station.</p>
@@ -68,13 +68,15 @@ export default function App() {
               <StationDetails station={station} />
             </div>
 
-            <p className="source">Sources: {data.sources.join(' and ')}. Levels: European Air Quality Index (EEA).</p>
           </>
         )}
       </main>
-      <footer>
+      <footer className="site-footer">
+        {data && (
+          <p>Sources: {data.sources.join(' and ')}. Levels: European Air Quality Index (EEA).</p>
+        )}
         <p>
-          <a href="/report.html">Read the report</a>
+          <a href="/report.html">Read the report</a> on how AirCast Iceland was made.
         </p>
       </footer>
     </>
