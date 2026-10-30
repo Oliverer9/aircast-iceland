@@ -128,10 +128,12 @@ td {
   border-radius: 0.25rem;
 }
 /* Above the map tiles (200), below the wind (450) and markers (600). The blur turns
-   the circles into soft clouds. */
+   the circles into soft clouds, and multiply makes them tint the map like a highlighter
+   instead of covering it, so streets and names show through. */
 .leaflet-pane.pollution-pane {
   z-index: 350;
   filter: blur(6px);
+  mix-blend-mode: multiply;
 }
 .station-marker-wrap {
   background: none;

@@ -33,6 +33,10 @@ const CLOUD_MIN_PX = 30;
 // Metres covered by one screen pixel at this latitude and zoom (Web Mercator).
 const metresPerPixel = (lat, zoom) => (40075016.686 * Math.cos((lat * Math.PI) / 180)) / 2 ** (zoom + 8);
 
+// Clouds are strongest at the country view and fade as you zoom in, so streets and names
+// stay readable up close: 0.35 up to zoom 7, then 0.06 less per zoom step, never below 0.12.
+const cloudOpacity = (zoom) => Math.max(0.12, Math.min(0.35, 0.35 - (zoom - 7) * 0.06));
+
 function PollutionClouds({ stations }) {
   const map = useMap();
   const [zoom, setZoom] = useState(map.getZoom());
@@ -46,7 +50,7 @@ function PollutionClouds({ stations }) {
         center={[s.lat, s.lon]}
         radius={Math.max(CLOUD_RADIUS_M, CLOUD_MIN_PX * metresPerPixel(s.lat, zoom))}
         interactive={false}
-        pathOptions={{ stroke: false, fillColor: levelColor(s.level), fillOpacity: 0.35 }}
+        pathOptions={{ stroke: false, fillColor: levelColor(s.level), fillOpacity: cloudOpacity(zoom) }}
       />
     ));
 }

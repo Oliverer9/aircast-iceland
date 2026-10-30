@@ -191,6 +191,12 @@
           no cloud, so no colour is made up for them.
         </li>
         <li>
+          <strong>The clouds hid the streets when zoomed in.</strong> Two fixes: the clouds fade as you zoom in
+          (opacity 0.35 at the country view, down to 0.12 from zoom 11), and they use
+          <code>mix-blend-mode: multiply</code>, so they tint the map like a highlighter instead of covering it.
+          Checked at zoom 13 in Reykjavík: street names, road numbers and neighbourhoods are all readable.
+        </li>
+        <li>
           <strong>The dropdown stays</strong> as another way to pick a station. Reykjavík's stations sit close
           together on the map, and a list is easier for screen reader users.
         </li>
