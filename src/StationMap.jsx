@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Circle, MapContainer, Marker, Pane, TileLayer, Tooltip, useMap, useMapEvent } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { levelColor, levelName } from './airLevels.js';
+import { levelColor } from './airLevels.js';
+import { useText } from './i18n.jsx';
 import WindLayer from './WindLayer.jsx';
 import ClickWeather from './ClickWeather.jsx';
 
@@ -78,7 +79,22 @@ function KeepSizedAndFitted({ stations }) {
   return null;
 }
 
-export default function StationMap({ stations, wind, weatherStations, showWind, selectedId, onSelect }) {
+// Moves the map to a station when "Near me" finds one. Flies there, unless the visitor has
+// asked for less motion, in which case it jumps.
+function MoveToFocus({ focus, stations }) {
+  const map = useMap();
+  useEffect(() => {
+    const station = focus && stations.find((s) => s.id === focus.id);
+    if (!station) return;
+    const zoom = Math.max(map.getZoom(), 10);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) map.setView([station.lat, station.lon], zoom);
+    else map.flyTo([station.lat, station.lon], zoom, { duration: 1 });
+  }, [map, focus, stations]);
+  return null;
+}
+
+export default function StationMap({ stations, wind, weatherStations, showWind, dark, selectedId, focus, onSelect }) {
+  const { lang, levelName } = useText();
   const icons = useMemo(
     () => new Map(stations.map((s) => [s.id, markerIcon(s, s.id === selectedId)])),
     [stations, selectedId],
@@ -105,11 +121,14 @@ export default function StationMap({ stations, wind, weatherStations, showWind, 
       <Pane name="pollution" className="pollution-pane">
         <PollutionClouds stations={stations} />
       </Pane>
-      {showWind && <WindLayer wind={wind} />}
+      {/* Light streaks on the dark map, dark streaks on the light one. */}
+      {showWind && <WindLayer wind={wind} color={dark ? 'rgba(225, 235, 245, 0.85)' : 'rgba(20, 30, 50, 0.85)'} />}
       <ClickWeather weatherStations={weatherStations} />
+      <MoveToFocus focus={focus} stations={stations} />
       {stations.map((s) => (
         <Marker
-          key={s.id}
+          // Leaflet only reads the title when a marker is made, so a new language makes new markers.
+          key={`${s.id}-${lang}`}
           position={[s.lat, s.lon]}
           icon={icons.get(s.id)}
           title={`${s.name}: ${levelName(s.level)}`}

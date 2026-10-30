@@ -171,6 +171,79 @@
         </li>
       </ul>
 
+      <h2>More features</h2>
+      <ul>
+        <li>
+          <strong>The last 24 hours.</strong> Loftgæði keeps 24 hourly readings per pollutant, and the site only
+          showed the newest. Picking a station now loads its last 24 hours from a new server route
+          (<code>/api/history/:station</code>, cached for 5 minutes, and it refuses anything that doesn't look like
+          a station id). One line chart, one pollutant at a time picked with buttons, because the pollutants have
+          different units and scales and one chart with several axes would be misleading. Hovering shows the exact
+          hour and value, and the same numbers are in a table under the chart for anyone who can't use it.
+        </li>
+        <li>
+          <strong>What the level means.</strong> The advice under the badge is quoted from the European Environment
+          Agency's own index page, for everyone and for sensitive groups, rather than written by the AI. Stations
+          with no index get no advice.
+        </li>
+        <li>
+          <strong>Near me.</strong> Uses the browser's location, which the browser asks the visitor for first, to
+          pick the nearest air quality station and move the map there. The location stays in the browser; it is
+          never sent to the server. If the visitor says no, the page says why it can't help.
+        </li>
+        <li>
+          <strong>Weather forecast</strong> for the next 24 hours, every 3 hours, for the nearest of Veðurstofa's
+          19 forecast places. Forecasts are only in Veðurstofa's older XML service, which numbers its places
+          differently from the JSON API (Reykjavík is 1 there and 1470 in the JSON API). Checking showed 18 of the 19
+          numbers do match a JSON station and the last matches by name, so the coordinates come from the JSON station
+          list instead of being typed in. The XML is simple and flat, so a small regex parser reads it.
+        </li>
+        <li>
+          <strong>Íslenska / English.</strong> Every piece of text on the page, plus number formats (10,2 instead of
+          10.2). Pollutant names follow loftgaedi.is. The level names, the advice and the rest of the Icelandic are
+          the AI's translation and should be read by a native speaker. The forecast text comes from Veðurstofa in the
+          chosen language. The choice is remembered in the browser.
+        </li>
+        <li>
+          <strong>Updates itself.</strong> The page fetches new data every 5 minutes, the same as the server's cache,
+          keeps the old data on screen while it does, and the header says how many minutes ago the data was updated.
+        </li>
+        <li>
+          <strong>Dark mode.</strong> Follows the computer's setting until the visitor chooses, then remembers the
+          choice. It has its own colours, each measured: text 13.8:1, grey text 7.9:1 and links 8.1:1 on the dark
+          cards. Dark map tiles usually need a paid tile service, so the OpenStreetMap tiles are inverted with a CSS
+          filter instead. The pollution clouds lighten the map in dark mode, since darkening a dark map would hide
+          them, and the wind streaks turn light.
+        </li>
+      </ul>
+      <h3>Problems found while testing</h3>
+      <ul>
+        <li>
+          <strong>Icelandic numbers came out as 10.2.</strong> The test browser has no Icelandic number format and
+          quietly used English. Other browsers may be the same, so the comma and point are now swapped by hand.
+        </li>
+        <li>
+          <strong>The chart stayed empty in a background tab.</strong> It measured its width with a
+          <code>ResizeObserver</code>, which only reports when a frame is drawn. It now measures straight away too.
+        </li>
+        <li>
+          <strong>The pressed "Wind animation" button had white text on light blue in dark mode</strong>, about 2:1.
+          It now uses dark text there (8.1:1). The "Near me" button also showed an empty checkbox borrowed from the
+          on/off buttons; it runs an action, so the box was removed.
+        </li>
+        <li>
+          <strong>The chart line failed the chart colour check in dark mode</strong>: the bright link blue is too light
+          for a line on a dark background. Charts got their own blue (#4f94dc), which passes, while links keep theirs.
+        </li>
+      </ul>
+      <h3>Not verified</h3>
+      <ul>
+        <li>"Near me" with a real location: the test used a made-up position in Akureyri, since sharing a real
+          location needs a person to allow it.</li>
+        <li>The 5-minute refresh over a long time; only the code path was checked.</li>
+        <li>The Icelandic text by a native speaker.</li>
+      </ul>
+
       <h2>Map and pollution levels</h2>
       <p>
         The site shows every air quality station on a map, coloured by how polluted the air is, and a separate

@@ -67,7 +67,7 @@ function windAt(grid, lat, lon) {
   return Number.isNaN(grid.u[i]) ? null : { u: grid.u[i], v: grid.v[i] };
 }
 
-export default function WindLayer({ wind }) {
+export default function WindLayer({ wind, color }) {
   const map = useMap();
 
   useEffect(() => {
@@ -118,7 +118,7 @@ export default function WindLayer({ wind }) {
       ctx.fillRect(0, 0, size.x, size.y);
       ctx.globalCompositeOperation = 'source-over';
 
-      ctx.strokeStyle = 'rgba(20, 30, 50, 0.85)';
+      ctx.strokeStyle = color;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       for (const p of particles) {
@@ -158,7 +158,7 @@ export default function WindLayer({ wind }) {
       map.off('moveend zoomend resize', reset);
       canvas.remove();
     };
-  }, [map, wind]);
+  }, [map, wind, color]);
 
   return null;
 }

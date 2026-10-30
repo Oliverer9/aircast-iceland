@@ -35,6 +35,7 @@ variables are needed, because both APIs are keyless.
 
 - **Loftgæði** (air quality, https://api.ust.is/aq): `getLatest` for the newest readings, `getStations` for coordinates.
 - **Veðurstofa** (weather, https://api.vedur.is/weather): `observations/aws/10min/latest` for every station, `stations` for coordinates.
+- **Veðurstofa forecasts** (https://xmlweather.vedur.is): the older XML service, the only one with forecasts. Its place numbers mostly match the JSON API's, so coordinates come from the JSON station list.
 
 They don't share station ids, so each air quality station is matched to the nearest weather station by distance.
 
@@ -51,16 +52,20 @@ against the clock and the real API before replying. Type `/skills` in Copilot Ch
 
 ## How it's built
 
-- `server/sources/loftgaedi.js`, `server/sources/vedur.js` – one file per API. Fetch, check `res.ok`, return a small clean shape.
-- `server/combine.js` – joins the two by nearest station (haversine distance).
+- `server/sources/loftgaedi.js`, `server/sources/vedur.js`, `server/sources/forecast.js` – one file per source. Fetch, check `res.ok`, return a small clean shape.
+- `server/combine.js` – joins air quality and weather by nearest station; `server/geo.js` has the distance maths.
 - `server/airIndex.js` – the European Air Quality Index levels (EEA) for each reading and station.
-- `server/index.js` – the `/api/air-and-wind` route, cached for 5 minutes. Secret keys would be read from `.env` here only.
-- `src/useApi.js` – fetches our own `/api` routes with loading and error state.
-- `src/App.jsx` – loads the data and keeps track of the chosen station.
-- `src/StationMap.jsx` – Leaflet map with one marker per station, coloured by level.
+- `server/index.js` – the routes: `/api/air-and-wind`, `/api/history/:station` and `/api/forecast`, with caching. Secret keys would be read from `.env` here only.
+- `src/useApi.js` – fetches our own `/api` routes with loading and error state, and can refresh on an interval.
+- `src/i18n.jsx` – all the page's text in English and Icelandic. `src/theme.js` – light and dark mode.
+- `src/App.jsx` – loads the data, keeps track of the chosen station, and the "Near me" button.
+- `src/SiteHeader.jsx` – name, language and dark mode buttons, and the live summary.
+- `src/StationMap.jsx` – Leaflet map with one marker per station, coloured by level, plus pollution clouds.
 - `src/WindLayer.jsx` – the animated wind streaks, built from every Veðurstofa station's wind.
-- `src/StationDetails.jsx` – the chosen station's pollutants as coloured bars, plus the weather nearby.
-- `src/LevelLegend.jsx`, `src/airLevels.js` – the level colours and names.
+- `src/ClickWeather.jsx` – click anywhere on the map for the nearest weather station's reading.
+- `src/StationDetails.jsx` – the chosen station: level badge, advice, pollutant bars, weather and forecast.
+- `src/HistoryChart.jsx` – the last 24 hours as a line chart, with a table view. `src/Forecast.jsx` – the next 24 hours.
+- `src/LevelLegend.jsx`, `src/airLevels.js` – the level colours and the legend.
 - `public/report.html` – the report page.
 
 ### Adding another API

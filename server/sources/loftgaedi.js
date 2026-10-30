@@ -49,6 +49,29 @@ function worstLevel(readings) {
   return { index: worst.index, label: worst.label };
 }
 
+// The last 24 hours for one station, oldest first, for the charts. Same pollutants as above.
+export async function getStationHistory(id) {
+  const data = await getJson(`${BASE}/getCurrent/id/${encodeURIComponent(id)}`);
+  const station = data[id];
+  if (!station) return null;
+
+  const readings = Object.keys(POLLUTANTS)
+    .filter((code) => station.parameters[code])
+    .map((code) => {
+      const parameter = station.parameters[code];
+      const points = Object.keys(parameter)
+        .filter((key) => /^\d+$/.test(key))
+        .map((key) => parameter[key])
+        .filter((reading) => reading.value !== '' && Number.isFinite(Number(reading.value)))
+        .map((reading) => ({ time: reading.endtime, value: Math.max(0, Number(reading.value)) }))
+        .sort((a, b) => a.time.localeCompare(b.time));
+      return { code, unit: parameter.unit, points };
+    })
+    .filter((reading) => reading.points.length > 1);
+
+  return { id, name: station.name, readings };
+}
+
 // Newest reading from every station that is reporting, joined with each station's coordinates
 // (getLatest has no lat/lon, getStations does).
 export async function getAirStations() {

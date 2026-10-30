@@ -11,12 +11,30 @@
   --header-muted: #c7d6e4; /* 7.9:1 at the header's lighter end */
   --header-focus: #8cc8ff; /* focus ring on the dark header: 6.6:1 at its lighter end */
   --error: #b00020;
+  --track: #eef2f6; /* empty part of the level bars */
+  --chart-line: #0b5cad; /* passes the chart colour checks on the light surface */
   --radius: 0.875rem;
   --shadow: 0 1px 2px rgba(16, 32, 47, 0.06), 0 6px 20px rgba(16, 32, 47, 0.06);
   font-family: 'Inter Variable', system-ui, sans-serif;
   line-height: 1.5;
   color: var(--text);
   background: var(--bg);
+}
+
+/* Dark mode: its own colours, each checked for contrast against the dark surfaces,
+   not an automatic flip of the light ones. */
+:root[data-theme='dark'] {
+  --bg: #0d1620;
+  --text: #e8eef4;
+  --muted: #a8b7c6;
+  --card: #152230;
+  --line: #2b3b4c;
+  --border: #8596a8;
+  --accent: #7cbcff;
+  --track: #22313f;
+  --chart-line: #4f94dc; /* the brighter accent is too light for a chart line in dark mode */
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
 }
 
 body {
@@ -138,14 +156,95 @@ a {
 .site-header .swatch {
   border-color: #fff;
 }
+:root[data-theme='dark'] .site-header {
+  background: linear-gradient(135deg, #060f19 0%, #0d2a45 100%);
+}
+
+/* Language and dark mode, top right of the header */
+.header-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.lang-switch {
+  display: flex;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.lang-switch button,
+.header-toggle {
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-height: 2.25rem;
+  padding: 0 0.875rem;
+  border: 0;
+  background: transparent;
+  color: var(--header-text);
+  cursor: pointer;
+}
+.lang-switch button[aria-pressed='true'] {
+  background: #fff;
+  color: var(--header-bg);
+}
+.header-toggle {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+}
+.header-toggle::before {
+  content: '';
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-right: 0.4rem;
+  vertical-align: -0.05rem;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+.header-toggle[aria-pressed='true']::before {
+  background: currentColor;
+}
+.lang-switch button:hover,
+.header-toggle:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+.lang-switch button[aria-pressed='true']:hover {
+  background: #fff;
+}
 
 /* Station picker */
 .station-picker {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.25rem 0.75rem;
+  gap: 0.5rem 0.75rem;
   margin-top: 0.5rem;
+}
+.near-me {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 1rem;
+}
+/* It runs an action, so no on/off box like the toggle buttons have. */
+.toggle.near-me::before {
+  display: none;
+}
+.near-me svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+.near-me-status {
+  flex-basis: 100%;
+  margin: 0;
+  min-height: 1.25rem;
 }
 
 label {
@@ -244,14 +343,21 @@ td {
 }
 .toggle[aria-pressed='true'] {
   background: var(--accent);
-  color: #fff;
+  /* The card colour: white on the dark blue in light mode (6.7:1), dark on the light blue in dark mode (8.1:1). */
+  color: var(--card);
 }
 .toggle[aria-pressed='true']:hover {
   background: #094c8f;
 }
+:root[data-theme='dark'] .toggle:hover {
+  background: #1d3247;
+}
+:root[data-theme='dark'] .toggle[aria-pressed='true']:hover {
+  background: #a3d0ff;
+}
 .toggle[aria-pressed='true']::before {
-  background: #fff;
-  border-color: #fff;
+  background: var(--card);
+  border-color: var(--card);
 }
 .map {
   height: 32rem;
@@ -260,6 +366,28 @@ td {
 }
 .leaflet-container {
   font-family: inherit;
+}
+/* A dark map without a paid tile service: OpenStreetMap's tiles inverted and turned back
+   to their own hues, so water stays blue-ish and land grey. */
+:root[data-theme='dark'] .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+}
+:root[data-theme='dark'] .leaflet-container {
+  background: #1b2633;
+}
+/* Multiply would make the clouds vanish on a dark map, so they lighten it instead. */
+:root[data-theme='dark'] .leaflet-pane.pollution-pane {
+  mix-blend-mode: screen;
+}
+:root[data-theme='dark'] .leaflet-popup-content-wrapper,
+:root[data-theme='dark'] .leaflet-popup-tip {
+  background: var(--card);
+  color: var(--text);
+}
+:root[data-theme='dark'] .leaflet-bar a {
+  background: var(--card);
+  color: var(--text);
+  border-color: var(--line);
 }
 /* Above the map tiles (200), below the wind (450) and markers (600). The blur turns
    the circles into soft clouds, and multiply makes them tint the map like a highlighter
@@ -339,6 +467,157 @@ td {
   line-height: 1.2;
 }
 
+:root[data-theme='dark'] .level-badge {
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+/* What the level means */
+.advice {
+  margin: 0;
+}
+.advice div {
+  margin-bottom: 0.5rem;
+}
+.advice dt {
+  font-weight: 600;
+}
+.advice dd {
+  margin: 0;
+}
+
+/* Last 24 hours */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+}
+.chip {
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-height: 2rem;
+  min-width: 2.75rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+.chip:hover {
+  border-color: var(--accent);
+}
+.chip[aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--card);
+}
+.chart-title {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+}
+.chart {
+  position: relative;
+  width: 100%;
+  touch-action: pan-y;
+}
+.chart svg {
+  display: block;
+  overflow: visible;
+}
+.chart-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.chart-axis {
+  fill: var(--muted);
+  font-size: 0.75rem;
+}
+.chart-line {
+  fill: none;
+  stroke: var(--chart-line);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.chart-dot {
+  fill: var(--chart-line);
+  stroke: var(--card);
+  stroke-width: 2;
+}
+.chart-crosshair {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.chart-tooltip {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.chart-table summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+.chart-table table {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* Forecast: a row of 3-hour steps that scrolls sideways if it doesn't fit */
+.forecast {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0 0 0.25rem;
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+}
+.forecast li {
+  flex: 0 0 6.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.75rem;
+  background: var(--bg);
+}
+.forecast-time {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.forecast-temp {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.forecast-wind {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+}
+.forecast-condition {
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+.small-arrow {
+  width: 1rem;
+  height: 1rem;
+}
+
 /* Weather tiles */
 .weather-tiles {
   display: grid;
@@ -365,6 +644,12 @@ td {
   gap: 0.375rem;
   font-size: 1.5rem;
   font-weight: 700;
+  white-space: nowrap;
+}
+@media (max-width: 30rem) {
+  .tile-value {
+    font-size: 1.25rem;
+  }
 }
 .weather-tiles.compact {
   gap: 0.5rem;
@@ -464,7 +749,7 @@ td {
 }
 .bar-track {
   height: 0.875rem;
-  background: #eef2f6;
+  background: var(--track);
   border: 1px solid var(--border);
   border-radius: 999px;
   overflow: hidden;
